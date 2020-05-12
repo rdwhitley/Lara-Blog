@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Post;
+use App\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PostController extends Controller
 {
@@ -14,9 +16,8 @@ class PostController extends Controller
      */
     public function index()
     {
-        $user_name = 'rdwhitley';
-        $age = 19;
-        return view('pages/home',compact('user_name','age'));
+        $posts = Post::all();
+        return view('posts/index',compact('posts'));
     }
 
     /**
@@ -26,7 +27,8 @@ class PostController extends Controller
      */
     public function create()
     {
-        return "You have hit the create page";
+        $categories = Category::all();
+        return view('posts/create', compact('categories'));
     }
 
     /**
@@ -37,7 +39,16 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        return "You are storing data";
+        $title = $request->title;
+        $content = $request->content;
+        $category_id = $request->category_id;
+
+        $post = Post::create([
+            'title' => $title,
+            'content' => $content,
+            'category_id' => $category_id
+        ]);
+        return $request->all();
     }
 
     /**
@@ -46,9 +57,10 @@ class PostController extends Controller
      * @param  \App\Post  $post
      * @return \Illuminate\Http\Response
      */
-    public function show(Post $post, $title)
+    public function show(Post $post, $id)
     {
-        return "you are showing data for {$title}";
+        $post = Post::where('id',$id)->first();
+        return view('posts/show', compact('post'));
     }
 
     /**
@@ -57,9 +69,11 @@ class PostController extends Controller
      * @param  \App\Post  $post
      * @return \Illuminate\Http\Response
      */
-    public function edit(Post $post, $title)
+    public function edit(Post $post, $id)
     {
-        return "you are editing data";
+        $post = Post::where('id',$id)->first();
+        $categories = Category::all();
+        return view("posts/edit", compact('post', 'categories'));
     }
 
     /**
@@ -69,8 +83,13 @@ class PostController extends Controller
      * @param  \App\Post  $post
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Post $post, $title)
+    public function update(Request $request, Post $post, $id)
     {
+        Post::where('id',$id)->update([
+            'title' => $request->title,
+            'content' => $request->content,
+            'category_id' => 1
+        ]);
         return "you are updating data";
     }
 
@@ -82,6 +101,7 @@ class PostController extends Controller
      */
     public function destroy(Post $post, $title)
     {
+        Post::destroy($id);
         return "you are destroying data";
     }
 }
